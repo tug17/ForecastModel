@@ -66,7 +66,7 @@ def call_model(hp):
           "lr"            : hp.Float("lr",              min_value=0.000165, max_value=0.00175, step=0.00025),
           "batch_size"    : hp.Fixed("batch_size",      value=200),
           "retrain_epochs": hp.Fixed("retrain_epochs",  value=10),
-          "osc_length"    : hp.Fixed("osc_length",      value=0),
+          "osc_length"    : hp.Fixed("osc_length",      value=osc_offset),
           "hindcast_len"  : hp.Fixed("hindcast_length", value=72),
           "forecast_len"  : 96+osc_offset,
           "target_len"    : 96+osc_offset,

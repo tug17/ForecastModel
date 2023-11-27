@@ -169,7 +169,7 @@ class MyTuner(keras_tuner.BayesianOptimization):
         num_trainable     = int(np.sum([p.numpy().size for p in model.trainable_weights]))
         num_non_trainable = int(np.sum([p.numpy().size for p in model.non_trainable_weights]))
         with tf.summary.create_file_writer(current_log_path).as_default():
-            tf.summary.scalar("trial_id",      trial.trial_id, step=1)
+            tf.summary.scalar("trial_id",      np.float64(trial.trial_id), step=1)
             tf.summary.scalar("trainable",     num_trainable, step=1)
             tf.summary.scalar("non_trainable", num_non_trainable, step=1)
             tf.summary.scalar('kge_total',  np.mean(val_losses_kge), step=1)
