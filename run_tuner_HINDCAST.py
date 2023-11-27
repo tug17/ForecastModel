@@ -30,7 +30,7 @@ CROSS_INDICES_PATH = r"F:\11_EFFORS\data\indices_" + f"{osc_offset}"
 
 CURRENT_TIME = datetime.strftime(datetime.now(), "%Y%m%d")
 # CURRENT_TIME = "TESTING"
-TB_LOG_PATH = os.path.join(TB_LOG_PATH, "fine_" + CURRENT_TIME)
+TB_LOG_PATH = os.path.join(TB_LOG_PATH, "fine_" + CURRENT_TIME + "_hindcast")
 
 
 #%% define hp ranges
