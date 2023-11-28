@@ -1,8 +1,8 @@
 import os
-num_threads = 8
-os.environ["OMP_NUM_THREADS"] = "8"
-os.environ["TF_NUM_INTRAOP_THREADS"] = "8"
-os.environ["TF_NUM_INTEROP_THREADS"] = "8"
+num_threads = 16
+os.environ["OMP_NUM_THREADS"] = "16"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "16"
+os.environ["TF_NUM_INTEROP_THREADS"] = "16"
 
 import tensorflow as tf
 import keras_tuner
@@ -11,63 +11,37 @@ from tensorboard.plugins.hparams import api as tb_hp
 from datetime import datetime
 
 from ForecastModel.data.models import DataModelCV
-from ForecastModel.models import Hindcast as architecture
-from ForecastModel.tuners import MyTuner
-#%%
-# training settings
-num_epochs = 100
-patience   = 10
-osc_offset = 12 #0 #24
+from ForecastModel.models import CustomARIMA as architecture
+from ForecastModel.tuners import MyARIMATuner
+#
 
 max_trials    = 100
 inital_trials = 60
 overwrite     = True
+osc_offset    = 0
 
 # paths 
-TB_LOG_PATH = r"F:\11_EFFORS\python\tb"
-CSV_PATH    = r"F:\11_EFFORS\data\Edelsdorf.csv"
-CROSS_INDICES_PATH = r"F:\11_EFFORS\data\indices_" + f"{osc_offset}"
+TB_LOG_PATH = r"/home/sebastian/working_dir/Dissertation/LSTM_correction/ForecastModel/log"
+CSV_PATH    = r"/home/sebastian/working_dir/Dissertation/LSTM_correction/data_preparation/train_data/Edelsdorf.csv"
+CROSS_INDICES_PATH = r"/home/sebastian/working_dir/Dissertation/LSTM_correction/ForecastModel/indices_" + f"{osc_offset}"
 
 CURRENT_TIME = datetime.strftime(datetime.now(), "%Y%m%d")
 # CURRENT_TIME = "TESTING"
-TB_LOG_PATH = os.path.join(TB_LOG_PATH, CURRENT_TIME)
+TB_LOG_PATH = os.path.join(TB_LOG_PATH, "fine_" + CURRENT_TIME + "_hindcast")
 
-
-#%% define hp ranges
+# define hp ranges
 def call_model(hp):
     hyperparameter = {
-          "cnn_filter"    : hp.Fixed("cnn_filter",      value=4),
-          "cnn_kernel"    : hp.Fixed("cnn_kernel",      value=7),
-          "cnn_stride"    : 1,                          #hp.Int("cnn_stride",      min_value=1, max_value=9, step=2),
-          "pool_size"     : hp.Fixed("pool_size",       value=9),
-          "pool_stride"   : 1,                          #hp.Int("pool_stride",     min_value=1, max_value=9, step=2),
-          "dropout_rate"  : hp.Float("dropout_rate",    min_value=0.04, max_value=0.06, step=0.01),
-          "lstm_unit"     : hp.Fixed("lstm_unit",       value=5),
-          "lstm_dropout"  : hp.Float("lstm_dropout",    min_value=0.04, max_value=0.06, step=0.01),
-          "lr"            : hp.Float("lr",              min_value=0.000165, max_value=0.00175, step=0.00025),
-          "batch_size"    : hp.Fixed("batch_size",      value=200),
-          "retrain_epochs": hp.Fixed("retrain_epochs",  value=10),
-          "osc_length"    : hp.Fixed("osc_length",      value=0),
-          "hindcast_len"  : hp.Fixed("hindcast_length", value=72),
-          "forecast_len"  : 96+osc_offset,
-          "target_len"    : 96+osc_offset,
-          "n_features_hc" : 5, 
-          "n_features_fc" : 4, 
-          }
-          
-    # hyperparameter["cnn_stride"]  = int(hyperparameter["cnn_kernel"]/2) + 1
-    # hyperparameter["pool_stride"] = int(hyperparameter["pool_size"]/2) + 1
+           "p"    : hp.Int("p",      min_value=1, max_value=5, step=1),
+           "d"    : hp.Int("d",      min_value=0, max_value=3, step=1),
+           "q"    : hp.Int("q",      min_value=0, max_value=5, step=1),
+           "forecast_len" : 96,
+           "hindcast_length"    : hp.Int("hindcast_length", min_value=50, max_value=500, step=25)}
     
     model = architecture.build_model(hyperparameter)
-    optimizer = tf.keras.optimizers.Adam(learning_rate=hyperparameter["lr"])
-    model.compile(optimizer=optimizer, 
-               loss='mean_squared_error')
     
     return model
-
-    
-    
-#%% 
+# 
 # create paths
 
 if os.path.isdir(TB_LOG_PATH) == False:
@@ -76,17 +50,17 @@ if os.path.isdir(TB_LOG_PATH) == False:
     os.mkdir(os.path.join(TB_LOG_PATH, "hp"))
 
 # init datamodel 
-dm = DataModelCV(r"F:\11_EFFORS\data\Edelsdorf.csv",
+dm = DataModelCV(CSV_PATH,
                target_name       = "qmeasval",
-               hincast_features  = ['qsim','pmax','tmean','pmean','qmeastrain'],
-               forecast_features = ['qsim','pmax','tmean','pmean'],
+               hincast_features  = ['qsim','qmeastrain'],
+               forecast_features = ['qsim'],
                )
 
 # init hyperparameter object
 hp = keras_tuner.HyperParameters()
 
 # init tuner
-tuner = MyTuner(
+tuner = MyARIMATuner(
     hypermodel         = call_model,
     objective          = "val_loss",
     max_trials         = max_trials,
@@ -96,6 +70,9 @@ tuner = MyTuner(
     # distribution_strategy = tf.distribute.MirroredStrategy(),
     project_name       = "hp",
     )
+
+num_epochs = 100
+patience = 30
 
 # start tuner
 tuner.search(data_model = dm,

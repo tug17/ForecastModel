@@ -1,8 +1,8 @@
 import os
-num_threads = 8
-os.environ["OMP_NUM_THREADS"] = "8"
-os.environ["TF_NUM_INTRAOP_THREADS"] = "8"
-os.environ["TF_NUM_INTEROP_THREADS"] = "8"
+num_threads = 16
+os.environ["OMP_NUM_THREADS"] = "16"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "16"
+os.environ["TF_NUM_INTEROP_THREADS"] = "16"
 
 import tensorflow as tf
 import keras_tuner
@@ -13,27 +13,27 @@ from datetime import datetime
 from ForecastModel.data.models import DataModelCV
 from ForecastModel.models import Hindcast as architecture
 from ForecastModel.tuners import MyTuner
-#%%
+#
 # training settings
 num_epochs = 100
 patience   = 10
-osc_offset = 12 #0 #24
+osc_offset = 0 #0 #24
 
 max_trials    = 100
 inital_trials = 60
 overwrite     = True
 
 # paths 
-TB_LOG_PATH = r"F:\11_EFFORS\python\tb"
-CSV_PATH    = r"F:\11_EFFORS\data\Edelsdorf.csv"
-CROSS_INDICES_PATH = r"F:\11_EFFORS\data\indices_" + f"{osc_offset}"
+TB_LOG_PATH = r"/home/sebastian/working_dir/Dissertation/LSTM_correction/ForecastModel/log"
+CSV_PATH    = r"/home/sebastian/working_dir/Dissertation/LSTM_correction/data_preparation/train_data/Edelsdorf.csv"
+CROSS_INDICES_PATH = r"/home/sebastian/working_dir/Dissertation/LSTM_correction/ForecastModel/indices_" + f"{osc_offset}"
 
 CURRENT_TIME = datetime.strftime(datetime.now(), "%Y%m%d")
 # CURRENT_TIME = "TESTING"
 TB_LOG_PATH = os.path.join(TB_LOG_PATH, "fine_" + CURRENT_TIME + "_hindcast")
 
 
-#%% define hp ranges
+# define hp ranges
 def call_model(hp):
     # hyperparameter = {
           # "cnn_filter"    : hp.Int("cnn_filter",      min_value=4, max_value=24, step=2),
@@ -86,7 +86,7 @@ def call_model(hp):
 
     
     
-#%% 
+# 
 # create paths
 
 if os.path.isdir(TB_LOG_PATH) == False:
@@ -95,7 +95,7 @@ if os.path.isdir(TB_LOG_PATH) == False:
     os.mkdir(os.path.join(TB_LOG_PATH, "hp"))
 
 # init datamodel 
-dm = DataModelCV(r"F:\11_EFFORS\data\Edelsdorf.csv",
+dm = DataModelCV(CSV_PATH,
                target_name       = "qmeasval",
                hincast_features  = ['qsim','pmax','tmean','pmean','qmeastrain'],
                forecast_features = ['qsim','pmax','tmean','pmean'],
