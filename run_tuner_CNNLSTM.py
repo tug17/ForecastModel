@@ -11,21 +11,22 @@ from tensorboard.plugins.hparams import api as tb_hp
 from datetime import datetime
 
 from ForecastModel.data.models import DataModelCV
-from ForecastModel.models import Hindcast as architecture
+from ForecastModel.models import CNNLSTM as architecture
 from ForecastModel.tuners import MyTuner
+
 #%%
 # training settings
 num_epochs = 100
 patience   = 10
-osc_offset = 12 #0 #24
+osc_offset = 0 #0 #24
 
-max_trials    = 100
-inital_trials = 60
+max_trials    = 30
+inital_trials = 10
 overwrite     = True
 
 # paths 
 TB_LOG_PATH = r"F:\11_EFFORS\python\tb"
-CSV_PATH    = r"F:\11_EFFORS\data\Edelsdorf.csv"
+DATA_PATH   = r"F:\11_EFFORS\data\Edelsdorf.csv"
 CROSS_INDICES_PATH = r"F:\11_EFFORS\data\indices_" + f"{osc_offset}"
 
 CURRENT_TIME = datetime.strftime(datetime.now(), "%Y%m%d")
@@ -35,39 +36,22 @@ TB_LOG_PATH = os.path.join(TB_LOG_PATH, "fine_" + CURRENT_TIME + "_cnnlstm")
 
 #%% define hp ranges
 def call_model(hp):
-    # hyperparameter = {
-          # "cnn_filter"    : hp.Int("cnn_filter",      min_value=4, max_value=24, step=2),
-          # "cnn_kernel"    : hp.Int("cnn_kernel",      min_value=1, max_value=9, step=2),
-          # "cnn_stride"    : 1,                          #hp.Int("cnn_stride",      min_value=1, max_value=9, step=2),
-          # "pool_size"     : hp.Int("pool_size",       min_value=1, max_value=9, step=2),
-          # "pool_stride"   : 1,                          #hp.Int("pool_stride",     min_value=1, max_value=9, step=2),
-          # "dropout_rate"  : 0.05,                       #hp.Float("dropout_rate",  min_value=0.0, max_value=0.3, step=0.025),
-          # "lstm_unit"     : hp.Int("lstm_unit",       min_value=5, max_value=50, step=5),
-          # "lstm_dropout"  : 0.05,                       #hp.Float("lstm_dropout",  min_value=0.0, max_value=0.3, step=0.025),
-          # "lr"            : hp.Float("lr",            min_value=0.0001, max_value=0.0017, step=0.0001),
-          # "batch_size"    : hp.Int("batch_size",      min_value=200, max_value=400, step=50),
-          # "retrain_epochs": hp.Fixed("retrain_epochs",value=10),
-          # "osc_length"    : hp.Fixed("osc_length",    value=0),
-          # "hindcast_len"  : hp.Int("hindcast_length", min_value=24, max_value=120, step=24),
-          # "forecast_len"  : 96+osc_offset,
-          # "target_len"    : 96+osc_offset,
-          # "n_features_hc" : 5, 
-          # "n_features_fc" : 4, 
-          # }
     hyperparameter = {
-          "cnn_filter"    : hp.Fixed("cnn_filter",      value=4),
-          "cnn_kernel"    : hp.Fixed("cnn_kernel",      value=7),
+          "cnn_filter"    : hp.Fixed("cnn_filter",      value=14),
+          "cnn_kernel"    : hp.Fixed("cnn_kernel",      value=1),
           "cnn_stride"    : 1,                          #hp.Int("cnn_stride",      min_value=1, max_value=9, step=2),
-          "pool_size"     : hp.Fixed("pool_size",       value=9),
+          "pool_size"     : hp.Fixed("pool_size",       value=7),
           "pool_stride"   : 1,                          #hp.Int("pool_stride",     min_value=1, max_value=9, step=2),
           "dropout_rate"  : hp.Float("dropout_rate",    min_value=0.04, max_value=0.06, step=0.01),
-          "lstm_unit"     : hp.Fixed("lstm_unit",       value=5),
-          "lstm_dropout"  : hp.Float("lstm_dropout",    min_value=0.04, max_value=0.06, step=0.01),
-          "lr"            : hp.Float("lr",              min_value=0.000165, max_value=0.00175, step=0.00025),
-          "batch_size"    : hp.Fixed("batch_size",      value=200),
+          "lstm_unit_1"   : hp.Fixed("lstm_unit_1",     value=10),
+          "lstm_unit_2"   : hp.Fixed("lstm_unit_2",     value=0),
+          "lstm_dropout_1": hp.Float("lstm_dropout_1",  min_value=0.04, max_value=0.06, step=0.01),
+          "lstm_dropout_2": hp.Fixed("lstm_dropout_2",  value=0.05),
+          "lr"            : hp.Float("lr",              min_value=0.000095, max_value=0.000105, step=0.0000025),
+          "batch_size"    : hp.Fixed("batch_size",      value=400),
           "retrain_epochs": hp.Fixed("retrain_epochs",  value=10),
           "osc_length"    : hp.Fixed("osc_length",      value=0),
-          "hindcast_len"  : hp.Fixed("hindcast_length", value=72),
+          "hindcast_len"  : hp.Fixed("hindcast_length", value=12),
           "forecast_len"  : 96+osc_offset,
           "target_len"    : 96+osc_offset,
           "n_features_hc" : 5, 
@@ -95,7 +79,7 @@ if os.path.isdir(TB_LOG_PATH) == False:
     os.mkdir(os.path.join(TB_LOG_PATH, "hp"))
 
 # init datamodel 
-dm = DataModelCV(r"F:\11_EFFORS\data\Edelsdorf.csv",
+dm = DataModelCV(DATA_PATH,
                target_name       = "qmeasval",
                hincast_features  = ['qsim','pmax','tmean','pmean','qmeastrain'],
                forecast_features = ['qsim','pmax','tmean','pmean'],
