@@ -22,6 +22,7 @@ The code in this repository was used to produce and train all models in our manu
    - `ForecastModel/tuners.py` tuner code 
    - `ForecastModel/data/` contains code for data model to load samples during training
    - `ForecastModel/utils/` contains code for metrics and loss calculations, as well as post- and preprocessing functions
+- `notebooks` contains all notebooks used to create paper figures
 - `data/` containes dataset and sequence index arrays
 - `tb/` contains tuner logs and hyperparameters for tensorboard
 - `final_models/` contains trained models and fold predictions 
