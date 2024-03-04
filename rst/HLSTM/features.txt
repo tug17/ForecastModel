@@ -1,1 +1,0 @@
-{"target_name": "qmeasval", "feat_hindcast": ["pmax", "tmean", "pmean", "qmeasval"], "feat_forecast": ["pmax", "tmean", "pmean"]}
