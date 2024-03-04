@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # import json
 import pickle
 
-from sklearn.preprocessing import MinMaxScaler, RobustScaler
+from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
 
 class DataModelCV:
     def __init__(self, csv_path, target_name, hincast_features, forecast_features):
@@ -37,7 +37,7 @@ class DataModelCV:
         #    self.sets[key] = (np.array(self.sets[key][0]), np.array(self.sets[key][1]), np.array(self.sets[key][2]))
         self.params.update(dic["params"])
         
-    def getDataSet(self, n_set, scale=False):
+    def getDataSet(self, n_set, scale=False, shuffle=False):
         if type(n_set) == type(list()):
             hi, fi, yi = [], [], []
             for n in n_set:
@@ -51,9 +51,13 @@ class DataModelCV:
         else:
             hi, fi, yi = self.sets[n_set]
         
-        Xh = self.getWithIndexArray(self.hincast_features, hi)
-        Xf = self.getWithIndexArray(self.forecast_features, fi)
-        y  = self.getWithIndexArray(self.target, yi)
+        sorting = np.arange(yi.shape[0])
+        if shuffle:
+            np.random.shuffle(sorting)
+
+        Xh = self.getWithIndexArray(self.hincast_features, hi[sorting,:,:])
+        Xf = self.getWithIndexArray(self.forecast_features, fi[sorting,:,:])
+        y  = self.getWithIndexArray(self.target, yi[sorting,:,:])
         
         # print("dataset loaded")
         # print(Xh.shape)
@@ -62,7 +66,7 @@ class DataModelCV:
         dataset = ((Xh, Xf), y)
         
         if scale:
-            dataset = self.applyScaler(dataset)
+            dataset = self.applyScaler(dataset, scale)
         return dataset
     
     def getTimeSet(self, n_set, depth=0):
@@ -121,10 +125,16 @@ class DataModelCV:
         self.scaler_hincast  = scaler_hincast.fit(X[0][:,0,:])
         self.scaler_forecast = scaler_forecast.fit(X[1][:,0,:])
         
-    def applyScaler(self, dataset):
+    def applyScaler(self, dataset, hindcast_scale_index=True):  
         X, y = dataset
         Xh, Xf = X
-        for n in range(Xh.shape[1]):
+        
+        if type(hindcast_scale_index) == type([]):
+            idx_feats = hindcast_scale_index
+        else:
+            idx_feats = [x for x in range(Xh.shape[1])]
+        
+        for n in idx_feats:
             Xh[:,n,:] = self.scaler_hincast.transform(Xh[:,n,:])
         for n in range(Xf.shape[1]):
             Xf[:,n,:] = self.scaler_forecast.transform(Xf[:,n,:])

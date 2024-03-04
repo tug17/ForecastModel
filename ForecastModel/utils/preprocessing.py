@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,6 +18,12 @@ class CreateIndices:
         self.out_path  = out_path
         # load data
         self.df = pd.read_csv(data_path, parse_dates=['time'], index_col='time')
+        self.df = self.df.set_index(pd.to_datetime(self.df.index))
+        try: 
+            self.mask = self.df["is_peak_flow"].values.tolist()
+        except:
+            print("no masking column found")
+            self.mask = [True for x in range(self.df.shape[0])]
 
     def prepare_hincast_data(self, observations, hincastlen, forecastlen, start_index):
         X = []
@@ -50,8 +57,11 @@ class CreateIndices:
     def create(self, n_sets = 7, hincast_lengths = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120], forecast_len = 96, target_len = 96, oscilation_len=0):
         for hincast_len in hincast_lengths:
             print("prepareing index arrays")
+            
             n_preCutOff  = hincast_len
             n_postCutOff = target_len
+            
+            
             n_samples = self.df.shape[0] - n_preCutOff
             
             i_splits = [n_preCutOff + int(x*n_samples/n_sets) for x in range(0,n_sets+1)]
@@ -59,6 +69,10 @@ class CreateIndices:
             sets = {}
             for n_set, i in enumerate(range(1,n_sets+1)):
                 i_set = np.arange(i_splits[i-1], i_splits[i] - n_postCutOff, dtype=int)
+                
+                # masking
+                i_set = np.array([x for x in i_set.tolist() if self.mask[x]])
+                
                 i_hincast  = np.zeros((len(i_set), hincast_len, 1), dtype=int)
                 i_forecast = np.zeros((len(i_set), forecast_len + oscilation_len, 1), dtype=int)
                 i_target   = np.zeros((len(i_set), target_len   + oscilation_len, 1), dtype=int)

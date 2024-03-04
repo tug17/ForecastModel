@@ -1,5 +1,59 @@
 #!/usr/bin/env python3
 import numpy as np
+import os
+import json
+
+# helper functions
+def get_n_peaks(df, col_eval, n_peaks, window):
+    peaks = []
+    df_length = df.shape[0]
+    for n_peak in range(n_peaks):
+        i_max   = df[col_eval].argmax()
+        i_start = np.max([0, i_max - window//2])
+        i_end   = np.min([df_length, i_max + window//2])
+        
+        peaks.append(df.iloc[i_start:i_end])
+        
+        df = df.drop(df.index[i_start:i_end], axis=0)
+    
+    return peaks
+
+def extract_arima_metrics(path):
+    with open(os.path.join(path, "model.json"),"r") as f:
+        dic = json.load(f)
+        
+    for metric in ["NSE", "KGE", "bias"]:
+        array = []
+        for n_fold in range(1,6):
+            array.append(dic[f"Fold_{n_fold:d}"][metric])
+            
+        np.savetxt(os.path.join(path, f"metric_{metric.lower()}.txt"),
+                      np.array(array), delimiter=",")
+
+    return dic
+
+def regroup_metrics(path):
+    metric = {"eval": {},
+             "test": {}}
+    for key in ["nse", "kge", "bias"]:
+        metric["test"][key] = np.loadtxt(os.path.join(path, f"metric_{key}.txt"), delimiter=",").tolist()
+
+    with open(os.path.join(path, "metrics.txt"), "w+") as f:
+        json.dump(metric, f)  
+
+def find_best_model(directory, metric_key="kge"):
+    valid = []
+    test = []
+    for path in os.listdir(directory):
+        try:
+            with open(os.path.join(directory, path, "metrics.txt"), "r") as f:
+                metrics = json.load(f)
+        except:
+            break
+        valid.append(np.mean(metrics["valid"][metric_key][2:]))
+        test.append(np.mean(metrics["test"][metric_key]))
+        
+    return valid, test
 
 def eval_peak_distance(time,meas_data,sim_data,hq1,window):
     
@@ -33,7 +87,6 @@ def eval_peak_distance(time,meas_data,sim_data,hq1,window):
         chuncks_blown.append(range_new)
     
     # compute distances
-
     times = []
     vals_meas = []
     vals_sim = []
@@ -57,31 +110,7 @@ def eval_peak_distance(time,meas_data,sim_data,hq1,window):
     
     return times, vals_meas, vals_sim, chuncks_blown, x_sim,y_sim,x_meas,y_meas
 
-def calculate_rms(observed, predicted):
-    return np.sqrt(mean_squared_error(observed, predicted))
-
-def calculate_nse(observations, predictions):
-    nse = (1 - ((predictions-observations)**2).sum() / ((observations-observations.mean())**2).sum())
-    return nse
-
-def calculate_kge(observations, predictions):
-    
-    m1, m2 = np.mean(observations), np.mean(predictions)
-    r = np.sum((observations - m1) * (predictions - m2)) / (np.sqrt(np.sum((observations - m1) ** 2)) * np.sqrt(np.sum((predictions - m2) ** 2)))
-    beta = m2 / m1
-    gamma = (np.std(predictions) / m2) / (np.std(observations) / m1)
-    
-    # alpha = np.std(predictions) / np.std(observations)
-    
-    KGE =  1 - np.sqrt((r - 1) ** 2 + (beta - 1) ** 2 + (gamma - 1) ** 2)
-    
-    return KGE
-
-def calculate_bias(observations, predictions):
-    pbias = np.sum((observations - predictions) / observations) * 100 / len(observations)
-    return pbias
-
-    
+# evaluate over forecasting horizont
 def evaluate_multistep(obs_multistep, pred_multistep, loss_function):
     # print((obs_multistep.shape), pred_multistep.shape)
     if obs_multistep.shape[1] == pred_multistep.shape[1]:
@@ -92,3 +121,43 @@ def evaluate_multistep(obs_multistep, pred_multistep, loss_function):
                        for x in range(pred_multistep.shape[1])] 
 
     return step_losses
+
+#%% metrics
+def calculate_rms(observed, predicted):
+    return np.sqrt(np.mean((observed - predicted)**2))
+
+def calculate_nse(observations, predictions):
+    nse = (1 - ((predictions-observations)**2).sum() / ((observations-observations.mean())**2).sum())
+    return nse
+
+def calculate_kge(observations, predictions):
+    
+    m1, m2 = np.nanmax((np.nanmean(observations), 1e-6)), np.nanmax((np.nanmean(predictions), 1e-6))
+    r = np.sum((observations - m1) * (predictions - m2)) / (np.sqrt(np.sum((observations - m1) ** 2)) * np.sqrt(np.sum((predictions - m2) ** 2)))
+    
+    beta = m2 / m1
+    gamma = (np.std(predictions) / m2) / (np.std(observations) / m1)
+    
+    # alpha = np.std(predictions) / np.std(observations)
+    
+    KGE =  1 - np.sqrt((r - 1) ** 2 + (beta - 1) ** 2 + (gamma - 1) ** 2)
+    
+    return KGE
+    
+def calculate_kge5alpha(observations, predictions):
+    
+    m1, m2 = np.nanmax((np.nanmean(observations), 1e-6)), np.nanmax((np.nanmean(predictions), 1e-6))
+    r = np.sum((observations - m1) * (predictions - m2)) / (np.sqrt(np.sum((observations - m1) ** 2)) * np.sqrt(np.sum((predictions - m2) ** 2)))
+    
+    beta = m2 / m1
+    gamma = (np.std(predictions) / m2) / (np.std(observations) / m1)
+    
+    alpha = np.std(predictions) / np.std(observations)
+    
+    KGE =  1 - np.sqrt((r - 1) ** 2 + (2*(alpha - 1)) ** 2 + (beta - 1) ** 2)
+    
+    return KGE
+
+def calculate_bias(observations, predictions):
+    pbias = np.sum((observations - predictions) / observations) * 100 / len(observations)
+    return pbias
