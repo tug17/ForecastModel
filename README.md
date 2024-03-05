@@ -22,10 +22,10 @@ The code in this repository was used to produce and train all models in our manu
    - `ForecastModel/tuners.py` tuner code 
    - `ForecastModel/data/` contains code for data model to load samples during training
    - `ForecastModel/utils/` contains code for metrics and loss calculations, as well as post- and preprocessing functions
-- `notebooks` contains all notebooks used to create paper figures
+- `notebooks/` contains all notebooks used to create paper figures
 - `data/` containes dataset and sequence index arrays
 - `tb/` contains tuner logs and hyperparameters for tensorboard
-- `final_models/` contains trained models and fold predictions 
+- `rst/` contains final trained models, fold predictions and evaluated metrics
 
 ## Setup to run the code locally
 
@@ -43,10 +43,10 @@ Build on Tensorflow 2.10 runs on Windows 10 with a CUDA capable NVIDIA GPU.
 conda env create -f environment.yml
 ```
 
-## Data needed
+### Data needed
 As original data cannot be published, dummy data will be created randomly during preprocessing.
 
-## Run locally
+### Run locally
 
 Activate conda environment:
 
@@ -64,6 +64,9 @@ Tuning process is started and logs and fold models are saved to tb/.
 ```
 python run_tuner.py
 ```
+
+### Run notebooks
+Notebooks can be run using Jupyter Notebook.
 
 
 ## Citation
