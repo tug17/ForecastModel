@@ -1,5 +1,5 @@
 # Hindcast-LSTM-model for improvment of hydrological forecasts
-Accompanying code (DOI: 10.5281/zenodo.10907305) for our HESS paper (SUBMITTED) "Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model"
+Accompanying code for our HESS paper (SUBMITTED) "Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model"
 
 ```
 Gegenleithner, S., Pirker, M., Dorfmann, C., Kern, R., Schneider, J., 2024. 
