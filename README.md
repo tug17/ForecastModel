@@ -2,9 +2,8 @@
 Accompanying code for our HESS paper "Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model"
 
 ```
-Gegenleithner, S., Manuel Pirker, M., Dorfmann, C., Kern, R., and Schneider, J.: Long Short-Term Memory 
-Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model. 
-not published.
+Gegenleithner, S., Pirker, M., Dorfmann, C., Kern, R., Schneider, J., 2024. 
+Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model. 
 ```
 
 The manuscript can be found here : [Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model (TO BE UPDATED)](https://github.com/tug17/ForecastModel)
@@ -14,8 +13,9 @@ The code in this repository was used to produce and train all models in our manu
 
 ## Content of the repository
 
+- `run_arima.py` python file to run ARIMA model calibration and prediction
 - `run_preprocessing.py` python file for preprocessing and creating random data
-- `run_tuner.py` python file to train our models
+- `run_tuner.py` python file to train our ML models
 - `environment.yml` contains installed packeges and dependencies
 - `ForecastModel/` contains the entire code to create, train and tune ARIMA and LSTM models
    - `ForecastModel/models.py` model architectures code 
@@ -45,6 +45,7 @@ conda env create -f environment.yml
 
 ### Data needed
 As original data cannot be published, dummy data will be created randomly during preprocessing.
+Only model results are published. 
 
 ### Run locally
 
@@ -66,16 +67,16 @@ python run_tuner.py
 ```
 
 ### Run notebooks
-Notebooks can be run using Jupyter Notebook.
-
+In order to run the notebooks, ForecastModel must be installed as a package.
 
 ## Citation
 
-If you use any of this code in your experiments, please make sure to cite the following publication (TO BE UPDATED)
+If you use any of this code in your experiments, please make sure to cite the following publication
 
 ```
 author = {Gegenleithner, S., Manuel Pirker, M., Dorfmann, C., Kern, R., and Schneider, J.},
 title = {Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model},
+year = {2024},
 }
 ```
 

@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Manuel Pirker
+"""
+
+#############################
+#         Imports
+#############################
 import os
 # use async allocator to avoid OOM on GPU
 os.environ["TF_GPU_ALLOCATOR"]="cuda_malloc_async"
@@ -16,60 +25,57 @@ from ForecastModel.tuners import MyTuner
 
 tf.config.run_functions_eagerly(False)
 
+#############################
+#         Init
+#############################
 # training settings
-num_epochs      = 10
-patience        = 3
-max_trials      = 1
-inital_trials   = 1
+num_epochs      = 100
+patience        = 10
+max_trials      = 50
+inital_trials   = 30
 overwrite       = True
 
 # paths
-TB_LOG_PATH = r"tb"
-DATA_PATH   = r"data\dummy_data.csv"
+#TB_LOG_PATH = r"tb"
+TB_LOG_PATH = r"F:\11_EFFORS\python\tb"
+DATA_PATH   = r"data\Dataset.csv"
 CROSS_INDICES_PATH = r"data\indices"
 
 CURRENT_TIME = datetime.strftime(datetime.now(), "%Y%m%d")
-TB_LOG_PATH = os.path.join(TB_LOG_PATH, CURRENT_TIME + "_random")
+TB_LOG_PATH = os.path.join(TB_LOG_PATH, CURRENT_TIME + "_HLSTM")
 
-# definitions
+# set features
 features = {
     "target_name": 'qmeasval',
     "feat_hindcast": [
-        'qsim',
+        #'qsim',
         'pmax',
         'tmean',
         'pmean', 
         'qmeasval',
         ],
     "feat_forecast": [
-        'qsim',
+        #'qsim',
         'pmax',
         'tmean',
         'pmean',
         ],
     }
-
-# create paths
-if os.path.isdir(TB_LOG_PATH) == False:
-    os.mkdir(TB_LOG_PATH)
-    os.mkdir(os.path.join(TB_LOG_PATH, "logs"))
-    os.mkdir(os.path.join(TB_LOG_PATH, "hp"))
     
-# save feature list
-print(os.path.join(TB_LOG_PATH, "features.txt"))
-with open(os.path.join(TB_LOG_PATH, "features.txt"), "w") as f:
-    json.dump(features, f)
 
+#############################
+#         Functions
+#############################
 # define hp search space
 def call_model(hp):
     hyperparameter = {
-           "dropout_rate"   : hp.Float("dropout_rate",  min_value=0.01, max_value=0.5),
-           "lstm_unit"      : hp.Int("lstm_unit",       min_value=12,   max_value=32),
+           "dropout_rate"   : hp.Float("dropout_rate",    min_value=0.01, max_value=0.5),
+           "lstm_unit"      : hp.Int("lstm_unit",         min_value=24,   max_value=96),
            "lstm_dropout"   : 0, #hp.Float("lstm_dropout",  min_value=0.0, max_value=0.3, step=0.025), removed due to cuDNN constraints
-           "lr"             : hp.Float("lr", min_value=0.001, max_value=0.01, sampling="log"),
-           "batch_size"     : hp.Int("batch_size",      min_value=200,max_value=1000, step=100),
-           "retrain_epochs" : hp.Int("retrain_epochs",  min_value=0,  max_value=3,    step=1),
-           "hindcast_len"   : hp.Int("hindcast_length", min_value=96, max_value=96*2, step=96),
+           "lr"             : hp.Float("lr",              min_value=0.001, max_value=0.01, sampling="log"),
+           "batch_size"     : hp.Fixed("batch_size",      value=4000),  #hp.Int("batch_size",      min_value=200,max_value=1000, step=100),
+           "retrain_epochs" : hp.Fixed("retrain_epochs",  value=5),     #hp.Int("retrain_epochs",    min_value=0,  max_value=5,    step=1),
+           "hindcast_len"   : hp.Fixed("hindcast_length", value=96),    #hp.Int("hindcast_length", min_value=96, max_value=96*2, step=96),
            "forecast_len"   : 96,
            "target_len"     : 96,
            "n_features_hc"  : len(features["feat_hindcast"]), 
@@ -86,6 +92,20 @@ def call_model(hp):
                )
     
     return model
+
+#############################
+#         Main
+#############################
+# create paths
+if os.path.isdir(TB_LOG_PATH) == False:
+    os.mkdir(TB_LOG_PATH)
+    os.mkdir(os.path.join(TB_LOG_PATH, "logs"))
+    os.mkdir(os.path.join(TB_LOG_PATH, "hp"))
+    
+# save feature list
+print(os.path.join(TB_LOG_PATH, "features.txt"))
+with open(os.path.join(TB_LOG_PATH, "features.txt"), "w") as f:
+    json.dump(features, f)
 
 # init datamodel 
 dm = DataModelCV(DATA_PATH,

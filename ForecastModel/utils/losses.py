@@ -1,7 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Manuel Pirker
+"""
+
+#############################
+#         Imports
+#############################
 import tensorflow as tf
 
+#############################
+#         Functions
+#############################
 def loss_nkge_nnse(y, y_hat):
-    ## normalized Nash–Sutcliffe efficiency
+    ## combinded NNSE and NKGE loss
+    # normalized Nash–Sutcliffe efficiency
     # mean of observation
     mean_obs = tf.reduce_mean(y)
 

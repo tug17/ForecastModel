@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Nov 27
-
-@authors: manuel, sebastian
+@author: Manuel Pirker
 """
+
+#############################
+#         Imports
+#############################
 import os
 import tensorflow as tf
 from tensorflow.keras import backend as K
@@ -21,7 +23,10 @@ import json
 
 from ForecastModel.utils.metrics import evaluate_multistep, calculate_bias, calculate_kge, calculate_nse, calculate_rms, calculate_kge5alpha
 
-# %%
+#############################
+#         Classes
+#############################
+#%
 class MyTuner(keras_tuner.BayesianOptimization):
     def on_trial_end(self, trial):
         super().on_trial_end(trial)
@@ -251,101 +256,3 @@ class MyTuner(keras_tuner.BayesianOptimization):
         self.save_model(trial, model)
         
         return 2 - obj_losses
-
-#%%
-
-class MyARIMATuner(keras_tuner.BayesianOptimization):
-    def on_trial_end(self, trial):
-        super().on_trial_end(trial)
-        with tf.summary.create_file_writer(os.path.join(self.tb_log_path, r"logs/trial_"+f"{trial.trial_id}")).as_default():
-            score = trial.score
-            hparams = trial.hyperparameters.get_config()['values']
-            tf.summary.scalar('score', score, step=1)
-            tb_hp.hparams(hparams)
-        
-    def save_model(self, trial, model):
-        model.save(os.path.join(self.tb_log_path, "hp", f"trial_{trial.trial_id}", "model.keras"))
-        
-    def save_model_fold(self, trial, fold_id, model):
-        model.save(os.path.join(self.tb_log_path, "hp", f"trial_{trial.trial_id}", f"model_fold_{fold_id}.keras"))
-        
-    def run_trial(self, trial, data_model, verbose, epochs, callbacks, cross_indices_path, tb_log_path, plot_fold_rst=True, save_fold_models=False, save_fold_prediction=True):
-        print(trial.trial_id)
-        # set tb_log_path
-        self.tb_log_path = tb_log_path
-        
-        current_log_path = os.path.join(tb_log_path, r"logs/trial_"+f"{trial.trial_id}")
-        
-        # load hyperparameters
-        hp = trial.hyperparameters
-        
-        # get data model
-        print(hp)
-        hindcast_length = hp["hindcast_length"]
-        data_model.main(os.path.join(cross_indices_path, f"cross_indices_{hindcast_length}.pckl"), verbose)
-        
-        val_losses_kge = []
-        val_losses_nse = []
-        val_losses_bias= []
-        metric_nse = []
-        metric_kge = []
-        metric_bias= []
-        for num,key in enumerate(data_model.cross_sets.keys()):
-            # logging
-            TensorBoardCallback = tf.keras.callbacks.TensorBoard(
-                os.path.join(current_log_path, f"fold_{num:02d}"), 
-                write_graph  = False,
-                write_images = False,
-                histogram_freq=None)
-    
-
-            print(f"processing cross_set {key} -------------------------------")
-            X_test,  y_test  = data_model.getDataSet(data_model.cross_sets[key]["test"], scale=True) 
-            
-            model = self.hypermodel.build(hp)
-
-            # evaluate model
-            print("evaluate model performence")
-            y_pred = model.predict(X_test)  
-            
-            print(y_pred.shape)
-            print(y_test.shape)
-        
-            losses_nse = evaluate_multistep(y_test[:,:,:], y_pred[:,:], calculate_nse)
-            losses_kge = evaluate_multistep(y_test[:,:,:], y_pred[:,:], calculate_kge)
-            losses_bias= evaluate_multistep(y_test[:,:,:], y_pred[:,:], calculate_bias)            
-            
-            print(f"metrics NSE, KGE, bias: {np.mean(losses_nse):6.4f}, {np.mean(losses_kge):6.4f}, {np.mean(losses_bias):6.4f}")
-            val_losses_kge.append(np.mean(losses_kge))
-            val_losses_nse.append(np.mean(losses_nse))
-            val_losses_bias.append(np.mean(losses_bias))
-            metric_nse.append(losses_nse)
-            metric_kge.append(losses_kge)
-            metric_bias.append(losses_bias)            
-
-            if save_fold_prediction:
-                np.savetxt(os.path.join(current_log_path, f"pred_fold_{num}.txt"),
-                          y_pred, delimiter=",")      
-
-            # write for tensorboard
-            with tf.summary.create_file_writer(current_log_path).as_default():
-                tf.summary.scalar(f'kge_fold_{num}',  np.mean(losses_kge), step=1)
-                tf.summary.scalar(f'nse_fold_{num}',  np.mean(losses_nse), step=1)
-                tf.summary.scalar(f'bias_fold_{num}', np.mean(losses_bias),step=1)
-            
-            
-         # calculate total loss
-        val_losses = val_losses_kge
-        total_loss = 1 - np.nanmean(val_losses)
-        
-        # save loss values
-        np.savetxt(os.path.join(current_log_path, "val_losses.txt"),
-                      np.array([total_loss] + val_losses), delimiter=",")
-        np.savetxt(os.path.join(current_log_path, "metric_nse.txt"),
-                      np.array(metric_nse), delimiter=",")
-        np.savetxt(os.path.join(current_log_path, "metric_kge.txt"),
-                      np.array(metric_kge), delimiter=",")
-        np.savetxt(os.path.join(current_log_path, "metric_bias.txt"),
-                      np.array(metric_bias), delimiter=",")
-
-        return total_loss

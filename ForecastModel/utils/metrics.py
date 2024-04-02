@@ -1,8 +1,19 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Sebastian Gegenleithner & Manuel Pirker
+"""
+
+#############################
+#         Imports
+#############################
 import numpy as np
 import os
 import json
 
+#############################
+#         Functions
+#############################
 # helper functions
 def get_n_peaks(df, col_eval, n_peaks, window):
     peaks = []
@@ -159,5 +170,10 @@ def calculate_kge5alpha(observations, predictions):
     return KGE
 
 def calculate_bias(observations, predictions):
-    pbias = np.sum((observations - predictions) / observations) * 100 / len(observations)
+
+    numerator   = np.sum(observations - predictions)
+    denominator = np.sum(observations)
+    
+    pbias = (numerator / denominator) * 100
+    
     return pbias

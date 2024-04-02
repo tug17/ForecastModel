@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Manuel Pirker
+"""
+
+#############################
+#         Imports
+#############################
 import pandas as pd
 from datetime import datetime, timedelta
 import numpy as np
@@ -10,6 +19,9 @@ import pickle
 
 import os
 
+#############################
+#         Classes
+#############################
 class CreateIndices:
     def __init__(self, data_path = r"F:\11_EFFORS\data\Edelsdorf.csv", out_path = "cross_indices"):
         self.data_path = data_path

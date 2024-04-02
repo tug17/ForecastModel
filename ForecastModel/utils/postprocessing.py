@@ -1,37 +1,20 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Manuel Pirker
+"""
+
+#############################
+#         Imports
+#############################
 import os
 import numpy as np
 import json
 import pandas as pd
 
-# class to handle plotting easier
-class Model:
-    def __init__(self, name, model_folder, n_trial=-1, target_name="", feat_hindcast=[], feat_forecast=[], is_external_model= False, is_final_model= False, color="r", ls="-"):
-        self.name  = name
-        self.color = color
-        self.ls    = ls
-        self.is_external_model = is_external_model
-        
-        if is_final_model:
-            self.lg_path = model_folder
-            self.hp_path = model_folder
-            if is_external_model:
-                is_external_model
-                # do nothing
-            else:
-                with open(os.path.join(self.lg_path, "features.txt"), "r") as f:
-                    dic = json.load(f)
-                self.target_name   = dic["target_name"]
-                self.feat_hindcast = dic["feat_hindcast"]
-                self.feat_forecast = dic["feat_forecast"]
-        else:
-            self.lg_path = os.path.join(model_folder, "log", f"trial_{n_trial:02d}")
-            self.hp_path = os.path.join(model_folder,  "hp", f"trial_{n_trial:02d}")
-            self.target_name   = target_name
-            self.feat_hindcast = feat_hindcast
-            self.feat_forecast = feat_forecast
-            
-            
+#############################
+#         Functions
+#############################
 def load_metrics(path):
     with open(path, "r") as f:
         metrics = json.load(f)
@@ -82,3 +65,33 @@ def df2latex(df, file):
                     f.write(f"&{num: 6.3f}")
             f.write(r"\\")
             f.write("\n")
+
+#############################
+#         Classes
+#############################
+# class to handle plotting easier
+class Model:
+    def __init__(self, name, model_folder, n_trial=-1, target_name="", feat_hindcast=[], feat_forecast=[], is_external_model= False, is_final_model= False, color="r", ls="-"):
+        self.name  = name
+        self.color = color
+        self.ls    = ls
+        self.is_external_model = is_external_model
+        
+        if is_final_model:
+            self.lg_path = model_folder
+            self.hp_path = model_folder
+            if is_external_model:
+                is_external_model
+                # do nothing
+            else:
+                with open(os.path.join(self.lg_path, "features.txt"), "r") as f:
+                    dic = json.load(f)
+                self.target_name   = dic["target_name"]
+                self.feat_hindcast = dic["feat_hindcast"]
+                self.feat_forecast = dic["feat_forecast"]
+        else:
+            self.lg_path = os.path.join(model_folder, "log", f"trial_{n_trial:02d}")
+            self.hp_path = os.path.join(model_folder,  "hp", f"trial_{n_trial:02d}")
+            self.target_name   = target_name
+            self.feat_hindcast = feat_hindcast
+            self.feat_forecast = feat_forecast

@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: Manuel Pirker
+"""
 
+#############################
+#         Imports
+#############################
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import json
 import pickle
 
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
 
+#############################
+#         Classes
+#############################
 class DataModelCV:
     def __init__(self, csv_path, target_name, hincast_features, forecast_features):
         self.csv_path = csv_path 
@@ -24,6 +33,12 @@ class DataModelCV:
         
     def loadCSV(self):
         self.df = pd.read_csv(self.csv_path, parse_dates=['time'], index_col='time')
+        if self.df.index.tz == None:
+            # make TZ aware
+            print("datetimes set to UTC+0000")
+            self.df.index = self.df.index.tz_localize("Europe/London", ambiguous='raise').tz_convert("UTC")
+        else:
+            self.df.index = self.df.index.tz_convert("UTC")
     
     def loadCrossIndices(self, filename='cross_indices.json'):
         # Read dictionary pkl file
@@ -163,4 +178,3 @@ class DataModelCV:
         #     print(self.cross_sets)
         
         self.fitScaler(0)
-
