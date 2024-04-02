@@ -1,5 +1,5 @@
 # Hindcast-LSTM-model for improvment of hydrological forecasts
-Accompanying code for our HESS paper "Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model"
+Accompanying code (DOI: 10.5281/zenodo.10907305) for our HESS paper (SUBMITTED) "Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model"
 
 ```
 Gegenleithner, S., Pirker, M., Dorfmann, C., Kern, R., Schneider, J., 2024. 
@@ -27,9 +27,9 @@ py-files
 - `data/` containes dataset and sequence index arrays
 - `tb/` contains tuner logs and hyperparameters for tensorboard
 - `rst/` contains final trained models, fold predictions and evaluated metrics
-   -`rst/ARIMA` contains ARIMA result files
-   -`rst/HLSTM-PBHM` contains HLSTM-PBHM result files and model save files for each fold
-   -`rst/HLSTM` contains HLSTM result files and model save files for each fold
+   - `rst/ARIMA` contains ARIMA result files
+   - `rst/HLSTM-PBHM` contains HLSTM-PBHM result files and model save files for each fold
+   - `rst/HLSTM` contains HLSTM result files and model save files for each fold
    
 ## Setup to run the code locally
 Download this repository either as zip-file or clone it to your local file system by running
@@ -77,7 +77,7 @@ If you use any of this code in your experiments, please make sure to cite the fo
 
 ```
 author = {Gegenleithner, S., Manuel Pirker, M., Dorfmann, C., Kern, R., and Schneider, J.},
-title = {Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model},
+title = {(SUBMITTED) Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model},
 year = {2024},
 }
 ```
