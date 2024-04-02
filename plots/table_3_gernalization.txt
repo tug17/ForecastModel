@@ -1,0 +1,6 @@
+index&kge_general_ARIMA&nse_general_ARIMA&bias_general_ARIMA&kge_general_HLSTM-PBHM&nse_general_HLSTM-PBHM&bias_general_HLSTM-PBHM&kge_general_HLSTM&nse_general_HLSTM&bias_general_HLSTM\\
+2013&\textbf{ 0.024}&\textbf{ 0.044}&\textbf{ 0.096}& 0.049& 0.095& 6.751& 0.294& 0.205& 4.752\\
+2014&\textbf{ 0.001}& 0.036&\textbf{ 0.165}& 0.004& 0.028& 4.333& 0.015&\textbf{ 0.022}& 4.805\\
+2015& 0.033& 0.042&\textbf{ 0.013}&\textbf{ 0.029}&\textbf{ 0.041}& 1.188& 0.155& 0.119& 6.900\\
+2016&\textbf{ 0.040}&\textbf{ 0.021}&\textbf{ 0.076}& 0.109& 0.072& 4.346& 0.086& 0.045& 5.044\\
+2017& 0.318& 0.768&\textbf{ 0.367}& 0.054& 0.130& 8.315&\textbf{ 0.049}&\textbf{ 0.089}& 2.436\\
