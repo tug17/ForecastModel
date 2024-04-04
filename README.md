@@ -48,7 +48,7 @@ conda env create -f environment.yml
 ```
 
 ### Data required
-All data will be published and archived via https://www.zenodo.org (DOI: https://doi.org/10.5281/zenodo.10907245) after acceptance of the paper.
+All data will be published and archived via https://www.zenodo.org (DOI (reserved): https://doi.org/10.5281/zenodo.10907245) after acceptance of the paper.
 To run the paper code and notebooks, download the `Dataset.csv` and place it in `data/`.
 Download `cross_indices_96.pckl` and place it in `data/indices`.
 Download `rst.zip` and unzip it into the main folder.
