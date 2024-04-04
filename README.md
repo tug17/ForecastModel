@@ -14,11 +14,11 @@ The code in this repository was used to produce and train all models in our manu
 ## Content of the repository
 
 py-files
-- `environment.yml` contains installed packeges and dependencies
+- `environment.yml` contains installed packages and dependencies
 - `run_arima.py` python file to run ARIMA model calibration and prediction
 - `run_preprocessing.py` python file for preprocessing and creating random data
 - `run_tuner.py` python file to train our ML models
-- `notebook_*` notebooks used to create paper figures and tables as well as auxilary plots
+- `notebook_*` notebooks used to create paper figures and tables as well as auxiliary plots
 - `ForecastModel/` contains the entire code to create, train and tune ARIMA and LSTM models
    - `ForecastModel/models.py` model architectures code 
    - `ForecastModel/tuners.py` tuner code 
@@ -39,7 +39,7 @@ git clone git@github.com:tug17/ForecastModel.git
 ```
 
 ### Setup Python environment
-Within this repository we provide a environment file (`environment.yml`) that can be used with Anaconda or Miniconda to create an environment with all packages needed.
+Within this repository, we provide a environment file (`environment.yml`) that can be used with Anaconda or Miniconda to create an environment with all packages needed.
 Build on Tensorflow 2.10 runs on Windows 10 with a CUDA capable NVIDIA GPU. 
 
 ```
@@ -47,9 +47,9 @@ conda env create -f environment.yml
 ```
 
 ### Data required
-All data is published and made publicly available via zenodo.org (DOI: 10.5281/zenodo.10907245)
-In order to run the paper code and notebooks, download the `Dataset.csv` and place it in `data/`.
-`model_results.zip` have to be downloaded and unziped into `rst/`.
+All data is published and made publicly available via zenodo.org (DOI: https://doi.org/10.5281/zenodo.10907245)
+To run the paper code and notebooks, download the `Dataset.csv` and place it in `data/`.
+Download `model_results.zip` and unzip it to `rst/`.
 
 ### Run locally
 Activate conda environment:
@@ -58,12 +58,12 @@ Activate conda environment:
 conda activate tf2
 ```
 
-During pre-processing index arrays are created at `data/indices`, which are later used do build the sequences for training.
+During pre-processing index arrays are created at `data/indices`, which are later used to build the sequences for training.
 
 ```
 python run_preprocessing.py
 ```
-Tuning process is started and logs for tensorboard as well as the fold models are saved to `tb/`.
+The tuning process is started and logs for tensorboard as well as the fold models are saved to `tb/`.
 
 ```
 python run_tuner.py
@@ -76,7 +76,7 @@ Notebooks can be run in the same environment.
 If you use any of this code in your experiments, please make sure to cite the following publication
 
 ```
-author = {Gegenleithner, S., Manuel Pirker, M., Dorfmann, C., Kern, R., and Schneider, J.},
+author = {Gegenleithner, S., Pirker, M., Dorfmann, C., Kern, R., and Schneider, J.},
 title = {(SUBMITTED) Long Short-Term Memory Networks for Real-time Flood Forecast Correction: A Case Study for an Underperforming Hydrologic Model},
 year = {2024},
 }
