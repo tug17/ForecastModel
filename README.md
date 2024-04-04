@@ -24,7 +24,8 @@ py-files
    - `ForecastModel/tuners.py` tuner code 
    - `ForecastModel/data/` contains code for data model to load samples during training
    - `ForecastModel/utils/` contains code for metrics and loss calculations, as well as post- and preprocessing functions
-- `data/` containes dataset and sequence index arrays
+- `data/` containes Dataset.csv
+   - `data/indices` contains sequence index arrays in .pkl format
 - `tb/` contains tuner logs and hyperparameters for tensorboard
 - `rst/` contains final trained models, fold predictions and evaluated metrics
    - `rst/ARIMA` contains ARIMA result files
@@ -47,9 +48,10 @@ conda env create -f environment.yml
 ```
 
 ### Data required
-All data is published and made publicly available via zenodo.org (DOI: https://doi.org/10.5281/zenodo.10907245)
+All data will be published and archived via https://www.zenodo.org (DOI: https://doi.org/10.5281/zenodo.10907245) after acceptance of the paper.
 To run the paper code and notebooks, download the `Dataset.csv` and place it in `data/`.
-Download `model_results.zip` and unzip it to `rst/`.
+Download `cross_indices_96.pckl` and place it in `data/indices`.
+Download `rst.zip` and unzip it into the main folder.
 
 ### Run locally
 Activate conda environment:
